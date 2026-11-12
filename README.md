@@ -10,7 +10,7 @@ Needs only the Xcode Command Line Tools.
 make test      # core tests (use this rather than a bare `swift test`)
 make app       # builds build/Spaced.app
 make run       # builds and opens it
-make install   # copies to /Applications and links `spaced` into /usr/local/bin
+make install   # copies to /Applications and links `spaced` into ~/.local/bin (override with PREFIX=)
 ```
 
 ## Keys

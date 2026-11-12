@@ -1,4 +1,4 @@
-PREFIX ?= /usr/local
+PREFIX ?= $(HOME)/.local
 
 .PHONY: build test app run install clean
 
