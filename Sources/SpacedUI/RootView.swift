@@ -10,7 +10,8 @@ struct RootView: View {
         HStack(spacing: 0) {
             if preferences.sidebarVisible, !model.isEmpty {
                 SidebarView(model: model)
-                Divider().ignoresSafeArea()
+                    .frame(width: preferences.sidebarWidth)
+                SidebarDivider(preferences: preferences)
             }
             VStack(spacing: 0) {
                 if model.isEmpty {
@@ -127,6 +128,28 @@ struct AsksBar: View {
     }
 }
 
+/// A hairline with a wider grab area; dragging it resizes the sidebar.
+struct SidebarDivider: View {
+    let preferences: Preferences
+
+    var body: some View {
+        Divider()
+            .ignoresSafeArea()
+            .overlay {
+                Color.clear
+                    .frame(width: 9)
+                    .contentShape(Rectangle())
+                    .pointerStyle(.columnResize)
+                    .gesture(
+                        DragGesture(minimumDistance: 1, coordinateSpace: .global)
+                            .onChanged { preferences.dragSidebar(by: $0.translation.width) }
+                            .onEnded { _ in preferences.endSidebarDrag() }
+                    )
+                    .ignoresSafeArea()
+            }
+    }
+}
+
 struct SidebarView: View {
     let model: SessionModel
 
@@ -169,7 +192,6 @@ struct SidebarView: View {
             .font(.system(size: 13))
             .padding(10)
         }
-        .frame(width: 220)
     }
 }
 

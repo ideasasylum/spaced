@@ -10,15 +10,30 @@ final class Preferences {
     var dim: Double { didSet { UserDefaults.standard.set(dim, forKey: "dim") } }
     var fontScale: Double { didSet { UserDefaults.standard.set(fontScale, forKey: "fontScale") } }
     var sidebarVisible: Bool { didSet { UserDefaults.standard.set(sidebarVisible, forKey: "sidebarVisible") } }
+    var sidebarWidth: Double { didSet { UserDefaults.standard.set(sidebarWidth, forKey: "sidebarWidth") } }
+    /// The sidebar's width when a drag on its divider began.
+    @ObservationIgnored private var sidebarDragStart: Double?
     var blursBackground: Bool { didSet { UserDefaults.standard.set(blursBackground, forKey: "blursBackground") } }
 
     private init() {
         let defaults = UserDefaults.standard
-        defaults.register(defaults: ["dim": 0.85, "fontScale": 1.0, "sidebarVisible": true, "blursBackground": true])
+        defaults.register(defaults: ["dim": 0.85, "fontScale": 1.0, "sidebarVisible": true, "blursBackground": true,
+                                     "sidebarWidth": 220.0])
         dim = defaults.double(forKey: "dim")
         fontScale = defaults.double(forKey: "fontScale")
         sidebarVisible = defaults.bool(forKey: "sidebarVisible")
+        sidebarWidth = defaults.double(forKey: "sidebarWidth")
         blursBackground = defaults.bool(forKey: "blursBackground")
+    }
+
+    func dragSidebar(by translation: Double) {
+        let start = sidebarDragStart ?? sidebarWidth
+        sidebarDragStart = start
+        sidebarWidth = min(480, max(140, start + translation))
+    }
+
+    func endSidebarDrag() {
+        sidebarDragStart = nil
     }
 
     func adjustDim(by delta: Double) {
