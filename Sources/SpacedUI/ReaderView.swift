@@ -19,6 +19,7 @@ struct ReaderView: View {
                 if model.mode == .reading {
                     Color.page.opacity(preferences.dim).allowsHitTesting(false)
                     PortholeView(model: model, scale: scale)
+                        .environment(\.emphasisesWordStarts, preferences.emphasisesWordStarts)
                         .padding(.horizontal, 32)
                         .padding(.vertical, 24)
                         .frame(maxHeight: geometry.size.height)

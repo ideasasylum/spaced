@@ -15,6 +15,18 @@ extension Color {
     }
 }
 
+private struct EmphasisesWordStartsKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// Whether prose should have the start of each word bolded. Only the porthole turns this on.
+    var emphasisesWordStarts: Bool {
+        get { self[EmphasisesWordStartsKey.self] }
+        set { self[EmphasisesWordStartsKey.self] = newValue }
+    }
+}
+
 struct BlockView: View {
     let block: Block
     /// Replaces the block's text, used to show a single sentence.
@@ -23,6 +35,7 @@ struct BlockView: View {
     var spoken: Range<Int>?
     let scale: CGFloat
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.emphasisesWordStarts) private var emphasisesWordStarts
     var showsTableHeader = false
 
     var body: some View {
@@ -87,7 +100,7 @@ struct BlockView: View {
     }
 
     private func body(_ content: AttributedString) -> Text {
-        Text(content).font(.system(size: 17 * scale))
+        Text(emphasisesWordStarts ? WordStartEmphasis.apply(to: content) : content).font(.system(size: 17 * scale))
     }
 
     private func row(_ cells: [AttributedString], _ columns: [TableColumnSize]) -> some View {

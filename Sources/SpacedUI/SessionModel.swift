@@ -14,6 +14,7 @@ final class Preferences {
     /// The sidebar's width when a drag on its divider began.
     @ObservationIgnored private var sidebarDragStart: Double?
     var blursBackground: Bool { didSet { UserDefaults.standard.set(blursBackground, forKey: "blursBackground") } }
+    var emphasisesWordStarts: Bool { didSet { UserDefaults.standard.set(emphasisesWordStarts, forKey: "emphasisesWordStarts") } }
     var autoAdvancesSpeech: Bool { didSet { UserDefaults.standard.set(autoAdvancesSpeech, forKey: "autoAdvancesSpeech") } }
 
     private init() {
@@ -26,6 +27,7 @@ final class Preferences {
         sidebarWidth = defaults.double(forKey: "sidebarWidth")
         blursBackground = defaults.bool(forKey: "blursBackground")
         autoAdvancesSpeech = defaults.bool(forKey: "autoAdvancesSpeech")
+        emphasisesWordStarts = defaults.bool(forKey: "emphasisesWordStarts")
     }
 
     func dragSidebar(by translation: Double) {

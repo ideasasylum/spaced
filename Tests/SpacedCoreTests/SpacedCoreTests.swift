@@ -95,6 +95,18 @@ Last paragraph.
         #expect(document.blocks[13].sentences.count == 1)
     }
 
+    @Test func wordStartEmphasisBoldsTheFirstPartOfEachWord() {
+        let block = Document(markdown: "Hello to `code` *reading*").blocks[0]
+        let emphasised = WordStartEmphasis.apply(to: block.text)
+        let bold = emphasised.runs
+            .filter { ($0.inlinePresentationIntent ?? []).contains(.stronglyEmphasized) }
+            .map { String(emphasised[$0.range].characters) }
+        #expect(bold == ["He", "t", "rea"])
+        #expect(String(emphasised.characters) == block.plainText)
+        let italicStart = emphasised.runs.first { String(emphasised[$0.range].characters) == "rea" }
+        #expect(italicStart?.inlinePresentationIntent == [.emphasized, .stronglyEmphasized])
+    }
+
     @Test func softBreaksBecomeSpaces() {
         let wrapped = Document(markdown: "one\ntwo")
         #expect(wrapped.blocks[0].plainText == "one two")

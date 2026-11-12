@@ -29,6 +29,8 @@ make install   # copies to /Applications and links `spaced` into /usr/local/bin
 | ⇧⌘R | review notes |
 | ⇧⌘C | copy notes as markdown |
 | ⌃⌘S | toggle sidebar |
+| ⌥⌘B | blur the background |
+| ⌥⌘E | bold the start of each word in the porthole |
 | ⌘+ / ⌘− / ⌘0 | text size |
 
 Open documents with ⌘O, ⌘V, drag and drop, or the CLI. Tabs are kept until you close them, including across crashes and restarts.
@@ -47,7 +49,6 @@ Notes come back as a blockquote of the text followed by your response.
 
 ## Ideas
 
-- Bionic-style emphasis toggle.
 - Xcode project wrapping the same package, for signing and distribution.
 
 ## Layout

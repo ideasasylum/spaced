@@ -110,6 +110,7 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
     @objc func parkThought(_ sender: Any?) { model.startParking() }
     @objc func readAloud(_ sender: Any?) { model.toggleSpeech() }
     @objc func toggleSpeechAutoAdvance(_ sender: Any?) { Preferences.shared.autoAdvancesSpeech.toggle() }
+    @objc func toggleWordStartEmphasis(_ sender: Any?) { Preferences.shared.emphasisesWordStarts.toggle() }
     @objc func toggleBlur(_ sender: Any?) { Preferences.shared.blursBackground.toggle() }
     @objc func moreDimming(_ sender: Any?) { Preferences.shared.adjustDim(by: 0.1) }
     @objc func lessDimming(_ sender: Any?) { Preferences.shared.adjustDim(by: -0.1) }
@@ -132,6 +133,9 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
         case #selector(readAloud(_:)):
             menuItem.title = model.isSpeaking ? "Stop Reading Aloud" : "Read Aloud"
             return !model.isEmpty && !isEditingText && model.mode != .review
+        case #selector(toggleWordStartEmphasis(_:)):
+            menuItem.state = Preferences.shared.emphasisesWordStarts ? .on : .off
+            return true
         case #selector(toggleBlur(_:)):
             menuItem.state = Preferences.shared.blursBackground ? .on : .off
             return true

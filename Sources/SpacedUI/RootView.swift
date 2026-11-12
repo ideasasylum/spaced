@@ -197,6 +197,7 @@ struct SidebarView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .focusable(false)
                 }
             }
             .font(.system(size: 13))
