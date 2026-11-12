@@ -21,6 +21,7 @@ struct RootView: View {
                         ReviewView(model: model, scale: preferences.fontScale)
                     } else {
                         ReaderView(model: model, preferences: preferences)
+                        ProgressFooter(progress: model.progress)
                     }
                 }
             }
@@ -58,6 +59,38 @@ struct EmptyStateView: View {
                 .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+/// A hairline progress bar with a time-left estimate, so the end always feels reachable.
+struct ProgressFooter: View {
+    let progress: ReadingProgress
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Text(label)
+                .font(.system(size: 11))
+                .monospacedDigit()
+                .foregroundStyle(.tertiary)
+            GeometryReader { geometry in
+                Rectangle()
+                    .fill(Color.accentColor.opacity(0.7))
+                    .frame(width: geometry.size.width * progress.fraction)
+            }
+            .frame(height: 2)
+            .background(Color.primary.opacity(0.06))
+        }
+        .accessibilityElement()
+        .accessibilityLabel("Progress")
+        .accessibilityValue("\(Int(progress.fraction * 100)) percent, \(label)")
+    }
+
+    private var label: String {
+        switch progress.minutesLeft {
+        case 0: return "last one"
+        case 1: return "about a minute left"
+        default: return "about \(progress.minutesLeft) min left"
+        }
     }
 }
 
@@ -102,15 +135,24 @@ struct SidebarView: View {
             VStack(alignment: .leading, spacing: 1) {
                 ForEach(model.document.sections) { section in
                     let isCurrent = model.currentSection == section.id
+                    let isDone = section.id < (model.currentSection ?? 0)
                     Button {
                         model.jump(toSection: section.id)
                     } label: {
                         HStack(spacing: 6) {
+                            RoundedRectangle(cornerRadius: 1.5)
+                                .fill(Color.heading(section.level).opacity(isDone ? 0.35 : 1))
+                                .frame(width: 3, height: 12)
                             Text(section.title.isEmpty ? "Start" : section.title)
                                 .lineLimit(1)
                                 .fontWeight(isCurrent ? .semibold : .regular)
-                                .foregroundStyle(isCurrent ? .primary : .secondary)
+                                .foregroundStyle(isCurrent ? .primary : isDone ? .tertiary : .secondary)
                             Spacer(minLength: 0)
+                            if isDone {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 9, weight: .semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
                             if !model.notes(in: section.blocks).isEmpty {
                                 Circle().fill(Color.accentColor).frame(width: 5, height: 5)
                             }

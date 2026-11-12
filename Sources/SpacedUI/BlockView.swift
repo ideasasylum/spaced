@@ -3,6 +3,16 @@ import SwiftUI
 
 extension Color {
     static let page = Color(nsColor: .textBackgroundColor)
+
+    /// One colour per heading level, so the level reads at a glance in the document and the sidebar.
+    static func heading(_ level: Int) -> Color {
+        switch level {
+        case 1: return Color(nsColor: .systemIndigo)
+        case 2: return Color(nsColor: .systemTeal)
+        case 3: return Color(nsColor: .systemOrange)
+        default: return Color(nsColor: .systemPink)
+        }
+    }
 }
 
 struct BlockView: View {
@@ -18,6 +28,7 @@ struct BlockView: View {
         case .heading(let level):
             Text(content)
                 .font(.system(size: headingSize(level) * scale, weight: .bold))
+                .foregroundStyle(Color.heading(level))
                 .padding(.top, level <= 2 ? 10 * scale : 4 * scale)
                 .wrapping()
         case .paragraph:

@@ -169,6 +169,15 @@ Last paragraph.
         #expect(Navigator(document: Document(markdown: "")).unit == nil)
     }
 
+    @Test func progressCountsWordsBeforeThePosition() {
+        let short = Document(markdown: "# One two\n\nThree four. Five six.\n\nSeven eight nine ten.")
+        #expect(short.progress(at: Position()) == ReadingProgress(fraction: 0, wordsLeft: 10))
+        #expect(short.progress(at: Position(block: 1, sentence: 1)) == ReadingProgress(fraction: 0.4, wordsLeft: 6))
+        #expect(short.progress(at: Position(block: 2)).wordsLeft == 4)
+        #expect(ReadingProgress(fraction: 0, wordsLeft: 201).minutesLeft == 2)
+        #expect(Document(markdown: "").progress(at: Position()).fraction == 0)
+    }
+
     @Test func unitText() {
         #expect(document.plainText(of: .sentence(block: 2, index: 1)) == "Second sentence here!")
         #expect(document.plainText(of: .section(3)) == "Deep\n\nLast paragraph.")

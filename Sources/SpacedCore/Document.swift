@@ -47,13 +47,39 @@ public enum ReadingUnit: Equatable, Sendable {
     case section(Int)
 }
 
+public struct ReadingProgress: Equatable, Sendable {
+    public static let wordsPerMinute = 200.0
+
+    /// How much of the document comes before the current position, from 0 to 1.
+    public let fraction: Double
+    public let wordsLeft: Int
+
+    public var minutesLeft: Int {
+        Int((Double(wordsLeft) / Self.wordsPerMinute).rounded(.up))
+    }
+}
+
 public struct Document: Equatable, Sendable {
     public let blocks: [Block]
     public let sections: [Section]
+    private let wordCounts: [Int]
 
     public init(blocks: [Block], sections: [Section]) {
         self.blocks = blocks
         self.sections = sections
+        wordCounts = blocks.map { $0.plainText.split(whereSeparator: \.isWhitespace).count }
+    }
+
+    /// Progress by word count. The current sentence or block counts as still to read.
+    public func progress(at position: Position) -> ReadingProgress {
+        let total = wordCounts.reduce(0, +)
+        guard total > 0, blocks.indices.contains(position.block) else {
+            return ReadingProgress(fraction: 0, wordsLeft: 0)
+        }
+        let block = blocks[position.block]
+        let withinBlock = wordCounts[position.block] * position.sentence / block.sentences.count
+        let read = wordCounts[..<position.block].reduce(0, +) + withinBlock
+        return ReadingProgress(fraction: Double(read) / Double(total), wordsLeft: total - read)
     }
 
     public init(markdown: String) {

@@ -76,6 +76,10 @@ final class SessionModel {
         unit.map(document.blockRange(of:)) ?? 0..<0
     }
 
+    var progress: ReadingProgress {
+        document.progress(at: navigator.position)
+    }
+
     var currentSection: Int? {
         isEmpty ? nil : document.blocks[navigator.position.block].section
     }
