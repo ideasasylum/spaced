@@ -1,12 +1,25 @@
 import Foundation
 
+/// How wide a table column wants to be, in characters, worked out across the whole table.
+public struct TableColumnSize: Equatable, Sendable {
+    /// The longest single word, which the column must fit to avoid breaking words.
+    public let longestWord: Int
+    /// The longest cell, which the column would need to avoid wrapping at all.
+    public let longestCell: Int
+
+    public init(longestWord: Int, longestCell: Int) {
+        self.longestWord = longestWord
+        self.longestCell = longestCell
+    }
+}
+
 /// One piece of the document in reading order: a heading, paragraph, list item, table row, code block or quote.
 public struct Block: Identifiable, Equatable, Sendable {
     public enum Kind: Equatable, Sendable {
         case heading(level: Int)
         case paragraph
         case listItem(depth: Int, marker: String)
-        case tableRow(header: [AttributedString], cells: [AttributedString], row: Int)
+        case tableRow(header: [AttributedString], cells: [AttributedString], row: Int, columns: [TableColumnSize])
         case code(language: String?)
         case quote
     }
@@ -18,6 +31,16 @@ public struct Block: Identifiable, Equatable, Sendable {
     /// Character-offset ranges into `plainText`. Always at least one.
     public let sentences: [Range<Int>]
     public let section: Int
+
+    public var isTableRow: Bool {
+        if case .tableRow = kind { return true }
+        return false
+    }
+
+    public var isFirstTableRow: Bool {
+        if case .tableRow(_, _, 0, _) = kind { return true }
+        return false
+    }
 
     public func sentenceText(_ index: Int) -> AttributedString {
         guard sentences.count > 1, sentences.indices.contains(index) else { return text }

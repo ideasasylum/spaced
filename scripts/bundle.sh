@@ -14,6 +14,7 @@ mkdir -p "$app/Contents/MacOS" "$app/Contents/Helpers" "$app/Contents/Resources"
 cp Resources/Info.plist "$app/Contents/Info.plist"
 cp "$bin/SpacedApp" "$app/Contents/MacOS/Spaced"
 cp "$bin/SpacedCLI" "$app/Contents/Helpers/spaced"
+cp -R "$bin/Highlightr_Highlightr.bundle" "$app/Contents/Resources/"
 if [ -f Resources/AppIcon.icns ]; then
 	cp Resources/AppIcon.icns "$app/Contents/Resources/AppIcon.icns"
 fi

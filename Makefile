@@ -5,8 +5,10 @@ PREFIX ?= /usr/local
 build:
 	swift build
 
+# The Command Line Tools sometimes fail to find the Swift Testing macro plugin after a rebuild;
+# a second run finds it.
 test:
-	swift test
+	swift test --enable-swift-testing --disable-xctest || swift test --enable-swift-testing --disable-xctest
 
 app:
 	sh scripts/bundle.sh

@@ -67,13 +67,16 @@ Last paragraph.
     }
 
     @Test func tableRowsCarryTheirHeader() {
-        guard case .tableRow(let header, let cells, let row) = document.blocks[12].kind else {
+        guard case .tableRow(let header, let cells, let row, let columns) = document.blocks[12].kind else {
             Issue.record("expected a table row")
             return
         }
         #expect(header.map { String($0.characters) } == ["Name", "Value"])
         #expect(cells.map { String($0.characters) } == ["beta", "2"])
         #expect(row == 1)
+        #expect(columns == [TableColumnSize(longestWord: 5, longestCell: 5), TableColumnSize(longestWord: 5, longestCell: 5)])
+        #expect(document.blocks[11].isFirstTableRow)
+        #expect(!document.blocks[12].isFirstTableRow)
         #expect(document.blocks[11].plainText == "alpha | 1")
     }
 

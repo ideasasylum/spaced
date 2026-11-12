@@ -7,7 +7,7 @@ A macOS reader that shows a markdown document one piece at a time, for getting t
 Needs only the Xcode Command Line Tools.
 
 ```sh
-make test      # core tests
+make test      # core tests (use this rather than a bare `swift test`)
 make app       # builds build/Spaced.app
 make run       # builds and opens it
 make install   # copies to /Applications and links `spaced` into /usr/local/bin
@@ -43,9 +43,6 @@ Notes come back as a blockquote of the text followed by your response.
 
 ## Ideas
 
-- Progress bar, time-left estimate, sections ticked off in the sidebar.
-- Coloured accents for headings.
-- Syntax highlighting for code blocks.
 - Text-to-speech for the current piece, with optional auto-advance.
 - Parking lot for unrelated thoughts, shown at the end.
 - Bionic-style emphasis toggle.

@@ -33,17 +33,17 @@ struct ReaderView: View {
                 VStack(alignment: .leading, spacing: 12 * scale) {
                     ForEach(model.document.blocks) { block in
                         let isCurrent = model.mode == .whole && model.currentBlocks.contains(block.id)
-                        BlockView(block: block, scale: scale, showsTableHeader: showsHeader(block))
+                        BlockView(block: block, scale: scale, showsTableHeader: block.isFirstTableRow)
                             .padding(.vertical, 4)
                             .padding(.horizontal, 10)
                             .background(isCurrent ? Color.accentColor.opacity(0.12) : .clear,
                                         in: RoundedRectangle(cornerRadius: 6))
                             .contentShape(Rectangle())
                             .onTapGesture { model.jump(toBlock: block.id) }
+                            .frame(maxWidth: block.isTableRow ? .infinity : readingWidth + 20)
                             .id(block.id)
                     }
                 }
-                .frame(maxWidth: readingWidth + 20, alignment: .leading)
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 32)
                 .padding(.vertical, height / 2)
@@ -68,10 +68,6 @@ struct ReaderView: View {
         return model.mode == .whole ? blocks.lowerBound : (blocks.lowerBound + blocks.upperBound) / 2
     }
 
-    private func showsHeader(_ block: Block) -> Bool {
-        if case .tableRow(_, _, let row) = block.kind { return row == 0 }
-        return false
-    }
 }
 
 /// The bordered card showing the current sentence, block or section, with its notes underneath.
@@ -107,7 +103,12 @@ struct PortholeView: View {
                 }
             }
         }
-        .frame(maxWidth: readingWidth + 72)
+        .frame(maxWidth: showsTable ? .infinity : readingWidth + 72)
+    }
+
+    /// Tables get the full window width; prose stays at a comfortable reading width.
+    private var showsTable: Bool {
+        model.document.blocks[model.currentBlocks].contains(where: \.isTableRow)
     }
 
     private var card: some View {
@@ -120,7 +121,7 @@ struct PortholeView: View {
                 BlockView(block: model.document.blocks[index], scale: scale, showsTableHeader: true)
             case .section(let index):
                 ForEach(model.document.blocks[model.document.sections[index].blocks]) { block in
-                    BlockView(block: block, scale: scale, showsTableHeader: isFirstRow(block))
+                    BlockView(block: block, scale: scale, showsTableHeader: block.isFirstTableRow)
                 }
             case nil:
                 EmptyView()
@@ -131,10 +132,6 @@ struct PortholeView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func isFirstRow(_ block: Block) -> Bool {
-        if case .tableRow(_, _, let row) = block.kind { return row == 0 }
-        return false
-    }
 }
 
 private struct NoteEditor: View {

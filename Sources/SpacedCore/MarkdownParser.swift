@@ -41,11 +41,12 @@ enum MarkdownParser {
             case let html as HTMLBlock:
                 addCode(html.rawHTML, language: "html")
             case let table as Markdown.Table:
-                let header = table.head.cells.map { Builder.attributed($0) }
-                for (index, row) in table.body.rows.enumerated() {
-                    let cells = row.cells.map { Builder.attributed($0) }
+                let header = Array(table.head.cells.map { Builder.attributed($0) })
+                let rows = table.body.rows.map { row in Array(row.cells.map { Builder.attributed($0) }) }
+                let columns = Builder.columns([header] + rows)
+                for (index, cells) in rows.enumerated() {
                     let plain = cells.map { String($0.characters) }.joined(separator: " | ")
-                    add(.tableRow(header: Array(header), cells: Array(cells), row: index),
+                    add(.tableRow(header: header, cells: cells, row: index, columns: columns),
                         text: AttributedString(plain))
                 }
             case is ThematicBreak:
@@ -114,6 +115,16 @@ enum MarkdownParser {
             blocks.append(Block(id: blocks.count, kind: .code(language: language),
                                 text: AttributedString(trimmed), plainText: trimmed,
                                 sentences: [0..<trimmed.count], section: 0))
+        }
+
+        private static func columns(_ rows: [[AttributedString]]) -> [TableColumnSize] {
+            let count = rows.map(\.count).max() ?? 0
+            return (0..<count).map { column in
+                let cells = rows.compactMap { $0.indices.contains(column) ? String($0[column].characters) : nil }
+                let words = cells.flatMap { $0.split(whereSeparator: \.isWhitespace) }
+                return TableColumnSize(longestWord: words.map(\.count).max() ?? 0,
+                                   longestCell: cells.map(\.count).max() ?? 0)
+            }
         }
 
         private func checkboxMarker(_ item: ListItem) -> String? {
