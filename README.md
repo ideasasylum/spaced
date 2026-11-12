@@ -120,3 +120,7 @@ The Command Line Tools don't ship SwiftUI's macro plugin, so `@State` can't be u
 
 - A signed, notarised download and a Homebrew cask.
 - An Xcode project wrapping the same package.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).
