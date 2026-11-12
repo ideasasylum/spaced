@@ -69,6 +69,7 @@ enum MainMenu {
             item("Read Aloud", #selector(DocumentWindowController.readAloud(_:)), "s", []),
             item("Keep Reading Aloud to the End", #selector(DocumentWindowController.toggleSpeechAutoAdvance(_:))),
             .separator(),
+            item("Park a Thought", #selector(DocumentWindowController.parkThought(_:)), "p", []),
             item("Review Notes", #selector(DocumentWindowController.reviewNotes(_:)), "r", [.command, .shift]),
             item("Copy Notes as Markdown", #selector(DocumentWindowController.copyNotes(_:)), "c", [.command, .shift]),
             .separator(),

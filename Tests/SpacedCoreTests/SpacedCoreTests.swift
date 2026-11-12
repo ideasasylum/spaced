@@ -235,6 +235,19 @@ Last paragraph.
         #expect(store.loadAll().count == 1)
     }
 
+    @Test func sessionsSavedBeforeParkedThoughtsStillOpen() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = SessionStore(directory: directory)
+        try store.save(Session(title: "Old", markdown: "# Old", parked: ["buy milk"]))
+        let file = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)[0]
+        var json = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: file)) as? [String: Any])
+        #expect(json["parked"] as? [String] == ["buy milk"])
+        json["parked"] = nil
+        try JSONSerialization.data(withJSONObject: json).write(to: file)
+        #expect(store.loadAll().map(\.parked) == [[]])
+    }
+
     @Test func requestsAndResultsPassThroughTheFileSystem() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }

@@ -22,7 +22,8 @@ struct RootView: View {
                         ReviewView(model: model, scale: preferences.fontScale)
                     } else {
                         ReaderView(model: model, preferences: preferences)
-                        ProgressFooter(progress: model.progress, isSpeaking: model.isSpeaking)
+                        ProgressFooter(progress: model.progress, isSpeaking: model.isSpeaking,
+                                       parkedCount: model.session.parked.count)
                     }
                 }
             }
@@ -67,6 +68,7 @@ struct EmptyStateView: View {
 struct ProgressFooter: View {
     let progress: ReadingProgress
     let isSpeaking: Bool
+    let parkedCount: Int
 
     var body: some View {
         VStack(spacing: 6) {
@@ -75,6 +77,10 @@ struct ProgressFooter: View {
                     Image(systemName: "speaker.wave.2.fill").foregroundStyle(Color.accentColor)
                 }
                 Text(label).monospacedDigit().foregroundStyle(.tertiary)
+                if parkedCount > 0 {
+                    Label("\(parkedCount)", systemImage: "tray.and.arrow.down").foregroundStyle(.tertiary)
+                        .help("Parked thoughts, shown with your notes at the end")
+                }
             }
             .font(.system(size: 11))
             GeometryReader { geometry in
@@ -246,6 +252,26 @@ struct ReviewView: View {
                 }
                 .controlSize(.large)
                 .padding(.top, 6)
+
+                if !model.session.parked.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Text("Parked thoughts").font(.system(size: 18 * scale, weight: .semibold))
+                            Spacer()
+                            Button("Copy") { model.copyParked() }
+                        }
+                        ForEach(Array(model.session.parked.enumerated()), id: \.offset) { index, thought in
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(thought).frame(maxWidth: .infinity, alignment: .leading)
+                                Button("Delete", systemImage: "trash") { model.deleteParked(at: index) }
+                                    .labelStyle(.iconOnly)
+                                    .buttonStyle(.borderless)
+                            }
+                            .font(.system(size: 16 * scale))
+                        }
+                    }
+                    .padding(.top, 24)
+                }
             }
             .frame(maxWidth: readingWidth, alignment: .leading)
             .frame(maxWidth: .infinity)

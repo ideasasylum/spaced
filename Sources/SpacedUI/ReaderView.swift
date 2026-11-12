@@ -23,6 +23,11 @@ struct ReaderView: View {
                         .padding(.vertical, 24)
                         .frame(maxHeight: geometry.size.height)
                 }
+                if model.parkDraft != nil {
+                    ParkField(model: model)
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                        .padding(.bottom, 18)
+                }
             }
         }
     }
@@ -159,6 +164,32 @@ private struct NoteEditor: View {
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
+        .onAppear { focused = true }
+    }
+}
+
+/// A one-line field for getting an unrelated thought out of your head without leaving the page.
+private struct ParkField: View {
+    @Bindable var model: SessionModel
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "tray.and.arrow.down").foregroundStyle(.secondary)
+            TextField("Park a thought for later.  Return to save", text: Binding(
+                get: { model.parkDraft ?? "" }, set: { if model.parkDraft != nil { model.parkDraft = $0 } }
+            ))
+            .textFieldStyle(.plain)
+            .focused($focused)
+            .onSubmit { model.commitParking() }
+        }
+        .font(.system(size: 14))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(maxWidth: 460)
+        .background(Color.page, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.22), lineWidth: 1))
+        .shadow(color: .black.opacity(0.08), radius: 10, y: 3)
         .onAppear { focused = true }
     }
 }

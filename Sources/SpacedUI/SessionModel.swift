@@ -71,6 +71,8 @@ final class SessionModel {
     private(set) var spokenRange: Range<Int>?
     /// Non-nil while a note is being written.
     var noteDraft: String?
+    /// Non-nil while a stray thought is being parked.
+    var parkDraft: String?
     /// Non-nil while the questions are being edited.
     var askDraft: String?
     private(set) var notesCopied = false
@@ -115,6 +117,7 @@ final class SessionModel {
         session.title = title ?? Session.title(for: document, markdown: markdown, sourcePath: sourcePath)
         session.asks = asks
         session.notes = []
+        session.parked = []
         session.position = Position()
         session.awaitedRequestID = awaitedRequestID
         mode = .reading
@@ -279,6 +282,34 @@ final class SessionModel {
         notesCopied = true
     }
 
+    // MARK: Parking lot
+
+    func startParking() {
+        guard !isEmpty, mode != .review else { return }
+        parkDraft = ""
+    }
+
+    func commitParking() {
+        guard let draft = parkDraft else { return }
+        let thought = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !thought.isEmpty {
+            session.parked.append(thought)
+            changed()
+        }
+        parkDraft = nil
+    }
+
+    func deleteParked(at index: Int) {
+        guard session.parked.indices.contains(index) else { return }
+        session.parked.remove(at: index)
+        changed()
+    }
+
+    func copyParked() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(session.parked.map { "- \($0)" }.joined(separator: "\n") + "\n", forType: .string)
+    }
+
     // MARK: Questions
 
     func editAsks() {
@@ -298,6 +329,7 @@ final class SessionModel {
         noteDraft = nil
         editingNoteID = nil
         askDraft = nil
+        parkDraft = nil
     }
 
     // MARK: Saving

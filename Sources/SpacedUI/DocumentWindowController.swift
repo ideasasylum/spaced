@@ -87,6 +87,7 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
         case 53: model.toggleWhole()
         case 36, 76: model.startNote()
         case 1: model.toggleSpeech()
+        case 35: model.startParking()
         default: return false
         }
         return true
@@ -106,6 +107,7 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
     @objc func editQuestion(_ sender: Any?) { model.editAsks() }
     @objc func copyNotes(_ sender: Any?) { model.copyNotes() }
     @objc func toggleSidebar(_ sender: Any?) { Preferences.shared.sidebarVisible.toggle() }
+    @objc func parkThought(_ sender: Any?) { model.startParking() }
     @objc func readAloud(_ sender: Any?) { model.toggleSpeech() }
     @objc func toggleSpeechAutoAdvance(_ sender: Any?) { Preferences.shared.autoAdvancesSpeech.toggle() }
     @objc func toggleBlur(_ sender: Any?) { Preferences.shared.blursBackground.toggle() }
