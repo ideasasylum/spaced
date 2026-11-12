@@ -135,3 +135,48 @@ public struct Document: Equatable, Sendable {
         }
     }
 }
+
+/// One stretch of text to read aloud, tied to the block it comes from so the spoken word can be highlighted.
+public struct SpeechItem: Equatable, Sendable {
+    public let block: Int
+    public let text: String
+    /// Where `text` starts within the block's plain text, or nil when the spoken words aren't the block's own
+    /// (a description of a table row or code block), in which case nothing is highlighted.
+    public let offsetInBlock: Int?
+}
+
+extension Document {
+    /// What to say for a reading unit: prose as written, table rows with their column names, and code
+    /// blocks as a short description, since code read aloud is noise.
+    public func speechItems(for unit: ReadingUnit) -> [SpeechItem] {
+        switch unit {
+        case .sentence(let index, let sentence):
+            let block = blocks[index]
+            guard block.sentences.count > 1 else { return [speechItem(for: block)] }
+            return [SpeechItem(block: index, text: block.sentencePlainText(sentence),
+                               offsetInBlock: block.sentences[sentence].lowerBound)]
+        case .block(let index):
+            return [speechItem(for: blocks[index])]
+        case .section(let index):
+            return blocks[sections[index].blocks].map(speechItem)
+        }
+    }
+
+    private func speechItem(for block: Block) -> SpeechItem {
+        switch block.kind {
+        case .code(let language):
+            let lines = block.plainText.split(separator: "\n", omittingEmptySubsequences: false).count
+            let name = language.map { "\($0) " } ?? ""
+            return SpeechItem(block: block.id, text: "\(name)code block, \(lines) line\(lines == 1 ? "" : "s").",
+                              offsetInBlock: nil)
+        case .tableRow(let header, let cells, _, _):
+            let parts = cells.enumerated().map { column, cell in
+                let name = column < header.count ? String(header[column].characters) + ": " : ""
+                return name + String(cell.characters)
+            }
+            return SpeechItem(block: block.id, text: parts.joined(separator: ". ") + ".", offsetInBlock: nil)
+        default:
+            return SpeechItem(block: block.id, text: block.plainText, offsetInBlock: 0)
+        }
+    }
+}

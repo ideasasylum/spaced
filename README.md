@@ -24,12 +24,15 @@ make install   # copies to /Applications and links `spaced` into /usr/local/bin
 | Return | note on the current piece (⌘Return saves, Esc cancels) |
 | ⌘[ / ⌘] | previous / next section |
 | ⌥↑ / ⌥↓ | more / less dimming |
+| S | read aloud / stop (keeps going to the end unless turned off in the Read menu) |
 | ⇧⌘R | review notes |
 | ⇧⌘C | copy notes as markdown |
 | ⌃⌘S | toggle sidebar |
 | ⌘+ / ⌘− / ⌘0 | text size |
 
 Open documents with ⌘O, ⌘V, drag and drop, or the CLI. Tabs are kept until you close them, including across crashes and restarts.
+
+Reading aloud uses the system voice. `defaults write dev.spaced.Spaced speechVolume 0.5` turns it down without touching system volume.
 
 ## CLI
 
@@ -43,7 +46,6 @@ Notes come back as a blockquote of the text followed by your response.
 
 ## Ideas
 
-- Text-to-speech for the current piece, with optional auto-advance.
 - Parking lot for unrelated thoughts, shown at the end.
 - Bionic-style emphasis toggle.
 - Xcode project wrapping the same package, for signing and distribution.

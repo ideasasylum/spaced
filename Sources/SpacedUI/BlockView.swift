@@ -19,12 +19,14 @@ struct BlockView: View {
     let block: Block
     /// Replaces the block's text, used to show a single sentence.
     var text: AttributedString?
+    /// Characters of the shown text to mark as being read aloud.
+    var spoken: Range<Int>?
     let scale: CGFloat
     @Environment(\.colorScheme) private var colorScheme
     var showsTableHeader = false
 
     var body: some View {
-        let content = text ?? block.text
+        let content = markingSpoken(text ?? block.text)
         switch block.kind {
         case .heading(let level):
             Text(content)
@@ -72,6 +74,16 @@ struct BlockView: View {
                 row(cells, columns)
             }
         }
+    }
+
+    private func markingSpoken(_ content: AttributedString) -> AttributedString {
+        guard let spoken, !spoken.isEmpty, spoken.lowerBound >= 0,
+              spoken.upperBound <= content.characters.count else { return content }
+        var content = content
+        let start = content.characters.index(content.startIndex, offsetBy: spoken.lowerBound)
+        let end = content.characters.index(start, offsetBy: spoken.count)
+        content[start..<end].backgroundColor = Color.accentColor.opacity(0.3)
+        return content
     }
 
     private func body(_ content: AttributedString) -> Text {

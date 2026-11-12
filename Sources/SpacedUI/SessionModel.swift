@@ -14,16 +14,18 @@ final class Preferences {
     /// The sidebar's width when a drag on its divider began.
     @ObservationIgnored private var sidebarDragStart: Double?
     var blursBackground: Bool { didSet { UserDefaults.standard.set(blursBackground, forKey: "blursBackground") } }
+    var autoAdvancesSpeech: Bool { didSet { UserDefaults.standard.set(autoAdvancesSpeech, forKey: "autoAdvancesSpeech") } }
 
     private init() {
         let defaults = UserDefaults.standard
         defaults.register(defaults: ["dim": 0.85, "fontScale": 1.0, "sidebarVisible": true, "blursBackground": true,
-                                     "sidebarWidth": 220.0])
+                                     "sidebarWidth": 220.0, "autoAdvancesSpeech": true])
         dim = defaults.double(forKey: "dim")
         fontScale = defaults.double(forKey: "fontScale")
         sidebarVisible = defaults.bool(forKey: "sidebarVisible")
         sidebarWidth = defaults.double(forKey: "sidebarWidth")
         blursBackground = defaults.bool(forKey: "blursBackground")
+        autoAdvancesSpeech = defaults.bool(forKey: "autoAdvancesSpeech")
     }
 
     func dragSidebar(by translation: Double) {
@@ -60,7 +62,13 @@ final class SessionModel {
 
     private(set) var session: Session
     private(set) var document: Document
-    var mode: Mode = .reading
+    var mode: Mode = .reading {
+        didSet { if mode == .review { stopSpeaking() } }
+    }
+    private(set) var isSpeaking = false
+    /// The block and character range being read aloud right now.
+    private(set) var spokenBlock: Int?
+    private(set) var spokenRange: Range<Int>?
     /// Non-nil while a note is being written.
     var noteDraft: String?
     /// Non-nil while the questions are being edited.
@@ -100,6 +108,7 @@ final class SessionModel {
     }
 
     func load(markdown: String, sourcePath: String?, title: String?, asks: [String], awaitedRequestID: UUID?, promptForAsk: Bool) {
+        stopSpeaking()
         document = Document(markdown: markdown)
         session.markdown = markdown
         session.sourcePath = sourcePath
@@ -166,6 +175,59 @@ final class SessionModel {
         session.level = navigator.level
         noteDraft = nil
         changed()
+        if isSpeaking {
+            speakCurrentUnit()
+        }
+    }
+
+    // MARK: Reading aloud
+
+    func toggleSpeech() {
+        if isSpeaking {
+            stopSpeaking()
+        } else {
+            speakCurrentUnit()
+        }
+    }
+
+    func stopSpeaking() {
+        guard isSpeaking else { return }
+        speechEnded()
+        Speaker.shared.stop()
+    }
+
+    func spokenRange(in block: Int) -> Range<Int>? {
+        spokenBlock == block ? spokenRange : nil
+    }
+
+    private func speakCurrentUnit() {
+        guard let unit, mode != .review else { return }
+        isSpeaking = true
+        spokenBlock = nil
+        spokenRange = nil
+        Speaker.shared.speak(document.speechItems(for: unit), for: self, handlers: Speaker.Handlers(
+            onWord: { [weak self] block, range in
+                self?.spokenBlock = block
+                self?.spokenRange = range
+            },
+            onFinish: { [weak self] in self?.finishedSpeakingUnit() },
+            onInterrupt: { [weak self] in self?.speechEnded() }
+        ))
+    }
+
+    private func finishedSpeakingUnit() {
+        var navigator = navigator
+        guard Preferences.shared.autoAdvancesSpeech, navigator.next() else {
+            speechEnded()
+            return
+        }
+        apply(navigator)
+    }
+
+    private func speechEnded() {
+        isSpeaking = false
+        spokenBlock = nil
+        spokenRange = nil
     }
 
     // MARK: Notes
@@ -256,6 +318,7 @@ final class SessionModel {
 
     /// Removes the stored session and, if a CLI call is waiting on it, hands the notes back.
     func discard(paths: SpacedPaths) {
+        stopSpeaking()
         pendingSave?.cancel()
         pendingSave = nil
         if let id = session.awaitedRequestID {

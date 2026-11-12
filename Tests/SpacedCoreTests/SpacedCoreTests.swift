@@ -181,6 +181,16 @@ Last paragraph.
         #expect(Document(markdown: "").progress(at: Position()).fraction == 0)
     }
 
+    @Test func speechItemsDescribeWhatCannotBeReadAsWritten() {
+        #expect(document.speechItems(for: .sentence(block: 2, index: 1)) ==
+            [SpeechItem(block: 2, text: "Second sentence here!", offsetInBlock: 21)])
+        #expect(document.speechItems(for: .block(12)) ==
+            [SpeechItem(block: 12, text: "Name: beta. Value: 2.", offsetInBlock: nil)])
+        #expect(document.speechItems(for: .block(13)) ==
+            [SpeechItem(block: 13, text: "swift code block, 2 lines.", offsetInBlock: nil)])
+        #expect(document.speechItems(for: .section(3)).map(\.text) == ["Deep", "Last paragraph."])
+    }
+
     @Test func unitText() {
         #expect(document.plainText(of: .sentence(block: 2, index: 1)) == "Second sentence here!")
         #expect(document.plainText(of: .section(3)) == "Deep\n\nLast paragraph.")

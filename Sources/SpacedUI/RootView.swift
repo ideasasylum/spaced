@@ -22,7 +22,7 @@ struct RootView: View {
                         ReviewView(model: model, scale: preferences.fontScale)
                     } else {
                         ReaderView(model: model, preferences: preferences)
-                        ProgressFooter(progress: model.progress)
+                        ProgressFooter(progress: model.progress, isSpeaking: model.isSpeaking)
                     }
                 }
             }
@@ -66,13 +66,17 @@ struct EmptyStateView: View {
 /// A hairline progress bar with a time-left estimate, so the end always feels reachable.
 struct ProgressFooter: View {
     let progress: ReadingProgress
+    let isSpeaking: Bool
 
     var body: some View {
         VStack(spacing: 6) {
-            Text(label)
-                .font(.system(size: 11))
-                .monospacedDigit()
-                .foregroundStyle(.tertiary)
+            HStack(spacing: 6) {
+                if isSpeaking {
+                    Image(systemName: "speaker.wave.2.fill").foregroundStyle(Color.accentColor)
+                }
+                Text(label).monospacedDigit().foregroundStyle(.tertiary)
+            }
+            .font(.system(size: 11))
             GeometryReader { geometry in
                 Rectangle()
                     .fill(Color.accentColor.opacity(0.7))

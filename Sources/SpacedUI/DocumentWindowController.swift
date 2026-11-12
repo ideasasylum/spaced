@@ -86,6 +86,7 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
         case 125: flags.contains(.option) ? Preferences.shared.adjustDim(by: -0.1) : model.narrow()
         case 53: model.toggleWhole()
         case 36, 76: model.startNote()
+        case 1: model.toggleSpeech()
         default: return false
         }
         return true
@@ -105,6 +106,8 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
     @objc func editQuestion(_ sender: Any?) { model.editAsks() }
     @objc func copyNotes(_ sender: Any?) { model.copyNotes() }
     @objc func toggleSidebar(_ sender: Any?) { Preferences.shared.sidebarVisible.toggle() }
+    @objc func readAloud(_ sender: Any?) { model.toggleSpeech() }
+    @objc func toggleSpeechAutoAdvance(_ sender: Any?) { Preferences.shared.autoAdvancesSpeech.toggle() }
     @objc func toggleBlur(_ sender: Any?) { Preferences.shared.blursBackground.toggle() }
     @objc func moreDimming(_ sender: Any?) { Preferences.shared.adjustDim(by: 0.1) }
     @objc func lessDimming(_ sender: Any?) { Preferences.shared.adjustDim(by: -0.1) }
@@ -121,6 +124,12 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
         switch menuItem.action {
         case #selector(paste(_:)):
             return NSPasteboard.general.string(forType: .string) != nil
+        case #selector(toggleSpeechAutoAdvance(_:)):
+            menuItem.state = Preferences.shared.autoAdvancesSpeech ? .on : .off
+            return true
+        case #selector(readAloud(_:)):
+            menuItem.title = model.isSpeaking ? "Stop Reading Aloud" : "Read Aloud"
+            return !model.isEmpty && !isEditingText && model.mode != .review
         case #selector(toggleBlur(_:)):
             menuItem.state = Preferences.shared.blursBackground ? .on : .off
             return true

@@ -116,12 +116,17 @@ struct PortholeView: View {
             switch model.unit {
             case .sentence(let index, let sentence):
                 let block = model.document.blocks[index]
-                BlockView(block: block, text: block.sentenceText(sentence), scale: scale, showsTableHeader: true)
+                let offset = block.sentences.count > 1 ? block.sentences[sentence].lowerBound : 0
+                let spoken = model.spokenRange(in: index).map { ($0.lowerBound - offset)..<($0.upperBound - offset) }
+                BlockView(block: block, text: block.sentenceText(sentence), spoken: spoken, scale: scale,
+                          showsTableHeader: true)
             case .block(let index):
-                BlockView(block: model.document.blocks[index], scale: scale, showsTableHeader: true)
+                BlockView(block: model.document.blocks[index], spoken: model.spokenRange(in: index), scale: scale,
+                          showsTableHeader: true)
             case .section(let index):
                 ForEach(model.document.blocks[model.document.sections[index].blocks]) { block in
-                    BlockView(block: block, scale: scale, showsTableHeader: block.isFirstTableRow)
+                    BlockView(block: block, spoken: model.spokenRange(in: block.id), scale: scale,
+                              showsTableHeader: block.isFirstTableRow)
                 }
             case nil:
                 EmptyView()
