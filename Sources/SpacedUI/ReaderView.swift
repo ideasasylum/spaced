@@ -31,6 +31,10 @@ struct ReaderView: View {
                 }
             }
         }
+        .textSelection(.enabled)
+        .environment(\.openURL, OpenURLAction { url in
+            model.follow(url) ? .handled : .systemAction
+        })
     }
 
     private func backdrop(height: CGFloat) -> some View {
@@ -55,6 +59,7 @@ struct ReaderView: View {
                 .padding(.vertical, height / 2)
             }
             .scrollDisabled(model.mode == .reading)
+            .clipped()
             .allowsHitTesting(model.mode == .whole)
             .onAppear { proxy.scrollTo(scrollTarget, anchor: .center) }
             .onChange(of: model.currentBlocks) {

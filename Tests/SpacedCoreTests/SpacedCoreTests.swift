@@ -107,6 +107,43 @@ Last paragraph.
         #expect(italicStart?.inlinePresentationIntent == [.emphasized, .stronglyEmphasized])
     }
 
+    @Test func blocksRoundTripToMarkdown() {
+        #expect(document.markdown(of: .block(1)) == "# Title")
+        #expect(document.markdown(of: .block(4)) == "- Item two with **bold**")
+        #expect(document.markdown(of: .block(5)) == "  - Nested item")
+        #expect(document.markdown(of: .block(7)) == "- [x] Done")
+        #expect(document.markdown(of: .block(12)) == "| Name | Value |\n| --- | --- |\n| beta | `2` |")
+        #expect(document.markdown(of: .block(13)) == "```swift\nlet x = 1\nlet y = 2\n```")
+        #expect(document.markdown(of: .block(14)) == "> A quoted line.")
+        #expect(document.markdown(of: .sentence(block: 2, index: 1)) == "Second sentence here!")
+        #expect(document.markdown(of: .section(2)) == """
+        ## Data
+
+        | Name | Value |
+        | --- | --- |
+        | alpha | 1 |
+        | beta | `2` |
+
+        ```swift
+        let x = 1
+        let y = 2
+        ```
+
+        > A quoted line.
+        """)
+        let inline = Document(markdown: "See [the *plan*](#the-plan) and ~~old~~ **bold text** here.")
+        #expect(inline.markdown(of: .block(0)) == "See [the *plan*](#the-plan) and ~~old~~ **bold text** here.")
+    }
+
+    @Test func anchorsFindSectionsTheWayGitHubDoes() {
+        let linked = Document(markdown: "# Rotating the /content-assets/ JWT secret\n\n## Setup\n\n## Setup\n\n## Who's next?")
+        #expect(linked.section(forAnchor: "rotating-the-content-assets-jwt-secret") == 0)
+        #expect(linked.section(forAnchor: "setup") == 1)
+        #expect(linked.section(forAnchor: "setup-1") == 2)
+        #expect(linked.section(forAnchor: "Whos-next") == 3)
+        #expect(linked.section(forAnchor: "missing") == nil)
+    }
+
     @Test func softBreaksBecomeSpaces() {
         let wrapped = Document(markdown: "one\ntwo")
         #expect(wrapped.blocks[0].plainText == "one two")

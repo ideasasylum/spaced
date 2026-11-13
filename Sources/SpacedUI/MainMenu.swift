@@ -34,6 +34,7 @@ enum MainMenu {
             .separator(),
             item("Cut", #selector(NSText.cut(_:)), "x"),
             item("Copy", #selector(NSText.copy(_:)), "c"),
+            item("Copy Whole Document", #selector(DocumentWindowController.copyWholeDocument(_:)), "c", [.command, .option]),
             item("Paste", #selector(NSText.paste(_:)), "v"),
             item("Select All", #selector(NSText.selectAll(_:)), "a"),
         ]))
@@ -71,6 +72,7 @@ enum MainMenu {
             item("Add Note", #selector(DocumentWindowController.addNote(_:)), "\r", []),
             item("Read Aloud", #selector(DocumentWindowController.readAloud(_:)), "s", []),
             item("Keep Reading Aloud to the End", #selector(DocumentWindowController.toggleSpeechAutoAdvance(_:))),
+            voiceSubmenu(),
             .separator(),
             item("Park a Thought", #selector(DocumentWindowController.parkThought(_:)), "p", []),
             item("Review Notes", #selector(DocumentWindowController.reviewNotes(_:)), "r", [.command, .shift]),
@@ -89,6 +91,14 @@ enum MainMenu {
         NSApp.windowsMenu = window.submenu
 
         return main
+    }
+
+    private static func voiceSubmenu() -> NSMenuItem {
+        let item = NSMenuItem(title: "Voice", action: nil, keyEquivalent: "")
+        let menu = NSMenu(title: "Voice")
+        menu.delegate = VoiceMenu.shared
+        item.submenu = menu
+        return item
     }
 
     private static func submenu(_ title: String, _ items: [NSMenuItem]) -> NSMenuItem {

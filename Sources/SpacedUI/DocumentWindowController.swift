@@ -49,8 +49,9 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
         fatalError("not used")
     }
 
+    /// Selectable (read-only) text can also be first responder; only an editable field counts as typing.
     private var isEditingText: Bool {
-        window?.firstResponder is NSTextView
+        (window?.firstResponder as? NSTextView)?.isEditable == true
     }
 
     // MARK: Keys
@@ -69,6 +70,10 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
                 window?.makeFirstResponder(nil)
                 return true
             }
+            return false
+        }
+        if flags == .command, event.keyCode == 8, !model.isEmpty {
+            copyUnlessSelectionDoes()
             return false
         }
         guard !flags.contains(.command), !flags.contains(.control), !model.isEmpty else { return false }
@@ -118,6 +123,28 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
     @objc func smallerText(_ sender: Any?) { Preferences.shared.adjustFontScale(by: -0.1) }
     @objc func actualSizeText(_ sender: Any?) { Preferences.shared.fontScale = 1 }
 
+    /// Reached when no selected text handles Copy: copies what's on screen instead.
+    @objc func copy(_ sender: Any?) {
+        if model.mode == .review {
+            model.copyNotes()
+        } else {
+            model.copyCurrentUnit()
+        }
+    }
+
+    @objc func copyWholeDocument(_ sender: Any?) { model.copyDocument() }
+
+    /// A click on selectable text makes it first responder even with nothing selected, and it then
+    /// swallows Copy without copying. If the pasteboard is untouched after the key press, copy ourselves.
+    private func copyUnlessSelectionDoes() {
+        let before = NSPasteboard.general.changeCount
+        DispatchQueue.main.async { [weak self] in
+            if NSPasteboard.general.changeCount == before {
+                self?.copy(nil)
+            }
+        }
+    }
+
     @objc func paste(_ sender: Any?) {
         guard let text = NSPasteboard.general.string(forType: .string) else { return }
         app.open(.text(text))
@@ -142,6 +169,8 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSMe
         case #selector(toggleSidebar(_:)), #selector(moreDimming(_:)), #selector(lessDimming(_:)),
              #selector(biggerText(_:)), #selector(smallerText(_:)), #selector(actualSizeText(_:)):
             return true
+        case #selector(copy(_:)), #selector(copyWholeDocument(_:)):
+            return !model.isEmpty
         case #selector(copyNotes(_:)):
             return !model.session.notes.isEmpty
         case #selector(reviewNotes(_:)), #selector(toggleWholeDocument(_:)), #selector(previousUnit(_:)),

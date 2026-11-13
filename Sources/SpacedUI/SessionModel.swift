@@ -284,6 +284,39 @@ final class SessionModel {
         notesCopied = true
     }
 
+    // MARK: Copying and links
+
+    /// Copies what the porthole is showing, as markdown.
+    func copyCurrentUnit() {
+        guard let unit else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(document.markdown(of: unit), forType: .string)
+    }
+
+    func copyDocument() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(session.markdown, forType: .string)
+    }
+
+    /// Handles links that point inside the document or at a neighbouring file. Returns false for
+    /// anything the system should open (web links and the like).
+    func follow(_ url: URL) -> Bool {
+        guard url.scheme == nil else { return false }
+        if url.path.isEmpty {
+            if let fragment = url.fragment, let section = document.section(forAnchor: fragment) {
+                jump(toSection: section)
+            }
+            return true
+        }
+        if let sourcePath = session.sourcePath {
+            let target = URL(fileURLWithPath: url.path, relativeTo: URL(fileURLWithPath: sourcePath).deletingLastPathComponent())
+            if FileManager.default.fileExists(atPath: target.path) {
+                onOpen?(.file(target.standardizedFileURL))
+            }
+        }
+        return true
+    }
+
     // MARK: Parking lot
 
     func startParking() {

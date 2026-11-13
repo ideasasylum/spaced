@@ -28,6 +28,10 @@ struct RootView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // Scroll views draw under the title bar by default; an opaque strip keeps the document out of it.
+            .overlay(alignment: .top) {
+                Color.page.frame(height: 0).ignoresSafeArea(edges: .top)
+            }
         }
         .background(Color.page.ignoresSafeArea())
         .onDrop(of: [.fileURL, .plainText], isTargeted: nil, perform: drop)
@@ -91,6 +95,7 @@ struct ProgressFooter: View {
             .frame(height: 2)
             .background(Color.primary.opacity(0.06))
         }
+        .padding(.top, 6)
         .accessibilityElement()
         .accessibilityLabel("Progress")
         .accessibilityValue("\(Int(progress.fraction * 100)) percent, \(label)")

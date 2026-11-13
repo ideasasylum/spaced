@@ -40,6 +40,7 @@ final class Speaker: NSObject, AVSpeechSynthesizerDelegate {
             let utterance = AVSpeechUtterance(string: item.text)
             utterance.postUtteranceDelay = 0.15
             utterance.volume = volume
+            utterance.voice = Voices.current
             items[ObjectIdentifier(utterance)] = item
             lastUtterance = ObjectIdentifier(utterance)
             synthesizer.speak(utterance)

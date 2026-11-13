@@ -41,6 +41,8 @@ Also:
 - Reading aloud with the system voice, marking each word as it's spoken.
 - A parking lot: jot down an unrelated thought without leaving your place.
 - Tabs that survive quitting, crashing and restarting. There's nothing to save.
+- Links work: web links open in the browser, `#heading` links jump within the document, and links to neighbouring files open in a new tab.
+- Text can be selected and copied; ⌘C with nothing selected copies what's in the box as markdown.
 - Light and dark mode, following the system.
 
 ## Install
@@ -95,6 +97,8 @@ Add this to the closing checklist.
 | S | read aloud / stop (keeps going to the end unless turned off in the Read menu) |
 | P | park an unrelated thought for later (shown on the review screen) |
 | ⇧⌘R | review notes |
+| ⌘C | copy the selected text, or what's in the box as markdown |
+| ⌥⌘C | copy the whole document as markdown |
 | ⇧⌘C | copy notes as markdown |
 | ⌃⌘S | toggle sidebar |
 | ⌥⌘B | blur the background |
@@ -104,7 +108,7 @@ Add this to the closing checklist.
 
 Everything is in the menus too, so shortcuts can be changed in System Settings.
 
-Reading aloud uses the system voice. `defaults write dev.spaced.Spaced speechVolume 0.5` turns it down without touching system volume.
+Reading aloud uses the best system voice installed for your language; choose another under Read > Voice. Better ones (Enhanced, Premium) are a free download in System Settings > Accessibility > Read & Speak > System Voice > Manage Voices. `defaults write dev.spaced.Spaced speechVolume 0.5` turns it down without touching system volume.
 
 ## How it's built
 

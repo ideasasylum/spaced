@@ -37,6 +37,11 @@ public struct Block: Identifiable, Equatable, Sendable {
         return false
     }
 
+    public var isListItem: Bool {
+        if case .listItem = kind { return true }
+        return false
+    }
+
     public var isFirstTableRow: Bool {
         if case .tableRow(_, _, 0, _) = kind { return true }
         return false
